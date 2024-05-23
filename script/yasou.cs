@@ -12,11 +12,17 @@ public class yasou : MonoBehaviour
     Animator anim;
     Rigidbody2D rb2d;
     float yatay_hareket;
+    public float ziplama_gucu;
+    bool yere_degdimi;
+    bool iki_kere_ziplama;
+    combo_hasari1 kombo_hasari;
+
     void Start()
     {
         yatay_hareket = UnityEngine.Input.GetAxis("Horizontal");
         anim=GetComponent<Animator>();
         rb2d=GetComponent<Rigidbody2D>();
+        kombo_hasari=GetComponent<combo_hasari1>();
     }
 
     void Update()
@@ -25,6 +31,7 @@ public class yasou : MonoBehaviour
         CharacterAnimation();
         CharacterAttack();
         CharacterAttackRun();
+        CharacteRjumping();
     }
 
     void CharacterMovement(){
@@ -59,12 +66,58 @@ public class yasou : MonoBehaviour
     void CharacterAttack(){
         if(UnityEngine.Input.GetKeyDown(KeyCode.E) && yatay_hareket == 0){
             anim.SetTrigger("attack");
+            kombo_hasari.DamageEnemy();
+            FindObjectOfType<AudioManager>().Play("swordsound1");
         }
     }
 
     void CharacterAttackRun(){
         if(UnityEngine.Input.GetKeyDown(KeyCode.E) && yatay_hareket != 0){
             anim.SetTrigger("attackrun");
+            kombo_hasari.DamageEnemy();
+            FindObjectOfType<AudioManager>().Play("swordsound1");
+        }
+    }
+
+    void CharacteRjumping(){
+        if(UnityEngine.Input.GetKeyDown(KeyCode.Space)){
+            anim.SetBool("jump",true);
+
+            if(yere_degdimi){
+                rb2d.velocity=Vector2.up*ziplama_gucu;
+                iki_kere_ziplama=true;
+            }
+            else if(iki_kere_ziplama){
+                ziplama_gucu /= 1.5f;
+                rb2d.velocity=Vector2.up*ziplama_gucu;
+
+                iki_kere_ziplama=false;
+                ziplama_gucu *= 1.5f;
+            }
+        }
+    }
+
+    void OnCollisionEnter2D(Collision2D col){
+        anim.SetBool("jump",false);
+
+        if(col.gameObject.tag =="zemin"){
+            yere_degdimi = true;
+        }
+    }
+
+    void OnCollisionStay2D(Collision2D col){
+        anim.SetBool("jump",false);
+
+        if(col.gameObject.tag =="zemin"){
+            yere_degdimi = true;
+        }
+    }
+
+    void OnCollisionExit2D(Collision2D col){
+        anim.SetBool("jump",true);
+
+        if(col.gameObject.tag =="zemin"){
+            yere_degdimi = false;
         }
     }
 }
