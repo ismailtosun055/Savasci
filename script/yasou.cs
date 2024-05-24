@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Windows;
 
-public class yasou : MonoBehaviour
+public class yasou : MonoBehaviour//yasounun hareketi ,ziplamasi...
 {
     public float movespeed;
     bool donme=true;
@@ -17,12 +17,16 @@ public class yasou : MonoBehaviour
     bool iki_kere_ziplama;
     combo_hasari1 kombo_hasari;
 
+    public bool characterattack;
+    public float charactertimer;
+
     void Start()
     {
         yatay_hareket = UnityEngine.Input.GetAxis("Horizontal");
         anim=GetComponent<Animator>();
         rb2d=GetComponent<Rigidbody2D>();
         kombo_hasari=GetComponent<combo_hasari1>();
+        charactertimer = 0.7f;
     }
 
     void Update()
@@ -32,9 +36,10 @@ public class yasou : MonoBehaviour
         CharacterAttack();
         CharacterAttackRun();
         CharacteRjumping();
+        CharacterAttackSpacing();
     }
 
-    void CharacterMovement(){
+    void CharacterMovement(){//karakterin hareketi
         yatay_hareket = UnityEngine.Input.GetAxis("Horizontal");
         rb2d.velocity = new Vector2(yatay_hareket*movespeed,rb2d.velocity.y);
     }
@@ -56,30 +61,36 @@ public class yasou : MonoBehaviour
         }
     }
 
-    void CharacterFlip(){
+    void CharacterFlip(){//donmesi
         donme = !donme;
         Vector3 Scaler = transform.localScale;
         Scaler.x *= -1;
         transform.localScale = Scaler;
     }
 
-    void CharacterAttack(){
+    void CharacterAttack(){//saldirisi
         if(UnityEngine.Input.GetKeyDown(KeyCode.E) && yatay_hareket == 0){
             anim.SetTrigger("attack");
-            kombo_hasari.DamageEnemy();
-            FindObjectOfType<AudioManager>().Play("swordsound1");
+            if(characterattack)
+            {
+                kombo_hasari.DamageEnemy();
+                characterattack = false;
+            }
         }
     }
 
-    void CharacterAttackRun(){
+    void CharacterAttackRun(){//koşup saldırmasi
         if(UnityEngine.Input.GetKeyDown(KeyCode.E) && yatay_hareket != 0){
             anim.SetTrigger("attackrun");
-            kombo_hasari.DamageEnemy();
-            FindObjectOfType<AudioManager>().Play("swordsound1");
+               if(characterattack)
+            {
+                kombo_hasari.DamageEnemy();
+                characterattack = false;
+            }
         }
     }
 
-    void CharacteRjumping(){
+    void CharacteRjumping(){//ziplamasi
         if(UnityEngine.Input.GetKeyDown(KeyCode.Space)){
             anim.SetBool("jump",true);
 
@@ -97,7 +108,24 @@ public class yasou : MonoBehaviour
         }
     }
 
-    void OnCollisionEnter2D(Collision2D col){
+    void CharacterAttackSpacing()//karakterin hep vuramamasi bir bosluk olmasi
+    {
+        if(characterattack == false)
+        {
+            charactertimer -= Time.deltaTime;
+        }
+        if(charactertimer < 0)
+        {
+            charactertimer = 0;
+        }
+        if(charactertimer == 0)
+        {
+            characterattack = true;
+            charactertimer = 0.7f;
+        }
+    }
+
+    void OnCollisionEnter2D(Collision2D col){//yer kontrolu
         anim.SetBool("jump",false);
 
         if(col.gameObject.tag =="zemin"){
