@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,7 +7,7 @@ public class Characterhealth : MonoBehaviour
 {
     public int maxhealth = 100;//yasounun cani
     public int currenthealth;//mevcud can
-    public healtbar healtbar;//can bari
+    public Healtbar healtbar;//can bari
 
     //enemy zamanla salddirisi
     public bool enemyattack;//dusman saldirisi
@@ -28,10 +29,10 @@ public class Characterhealth : MonoBehaviour
         }
 
         if(enemytimer < 0){
-            enemytimer = 0;
+            enemytimer = 0f;
         }
 
-        if(enemytimer == 0){
+        if(enemytimer == 0f){
             enemyattack = true;
             enemytimer = 1.5f;
         }
@@ -45,13 +46,17 @@ public class Characterhealth : MonoBehaviour
         }
     }
 
-    public void SaldiriHasari(int enemyattackdamage)//dusman saldiri hasari
+    public void TakeDamage(int damage)//dusman saldiri hasari
     {
         if(enemyattack){
+
             currenthealth -= 20;
             enemyattack = false;
+
             anim.SetTrigger("hurt");
         }
+        
+        healtbar.SetHealth(currenthealth);
 
         if(currenthealth <= 0){
             currenthealth = 0;
@@ -62,7 +67,7 @@ public class Characterhealth : MonoBehaviour
     }
 
     void Die(){
-        anim.SetBool("die",true);
+        anim.SetBool("dieyasou",true);
         GetComponent<yasou>().enabled = false;
         Destroy(gameObject,2f);
 
@@ -71,6 +76,10 @@ public class Characterhealth : MonoBehaviour
     void Update()
     {
         EnemyAttackSpacing();
-        CharacterDamage();  
+        CharacterDamage();
+
+        if(Input.GetKeyDown(KeyCode.Z)){
+            TakeDamage(20);
+        }
     }
 }
